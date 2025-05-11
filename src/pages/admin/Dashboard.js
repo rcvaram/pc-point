@@ -229,83 +229,118 @@ export default function Dashboard() {
     <Box 
       sx={{ 
         width: '100%',
-        minHeight: '100%',
-        p: 3,
-        backgroundColor: 'white',
-        boxShadow: 1,
-        borderRadius: 1,
-        overflow: 'hidden',
+        minHeight: '100vh',
+        p: { xs: 1, sm: 2, md: 3 },
+        backgroundColor: '#f5f7fa',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        boxSizing: 'border-box'
       }}
     >
       <Container 
         maxWidth={false} 
         sx={{ 
           flex: '1 1 auto',
-          py: 2,
+          py: { xs: 1, sm: 2 },
           display: 'flex',
           flexDirection: 'column',
-          minHeight: 0, // Important for proper scrolling
-          '& > * + *': { mt: 2 }
+          minHeight: 0,
+          '& > * + *': { mt: 2 },
+          p: { xs: 0, sm: 1 },
+          maxWidth: '100%',
+          overflow: 'hidden'
         }}
       >
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4" component="h1">
+        <Box 
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'stretch', sm: 'center' },
+            gap: 2,
+            mb: 2
+          }}
+        >
+          <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
             Product Management
           </Typography>
-          <Box>
-            {currentUser && (
-              <>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  startIcon={<Add />}
-                  onClick={() => handleOpen()}
-                  sx={{ mr: 2 }}
-                >
-                  Add Product
-                </Button>
-                <Button 
-                  variant="outlined" 
-                  color="error"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </>
-            )}
-          </Box>
+          {currentUser && (
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<Add />}
+              onClick={() => handleOpen()}
+              size="medium"
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                minWidth: '140px',
+                '& .MuiButton-startIcon': {
+                  mr: 1
+                }
+              }}
+            >
+              Add Product
+            </Button>
+          )}
         </Box>
 
         {error && <Alert severity="error">{error}</Alert>}
         
-        <Paper sx={{ 
-          flex: '1 1 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0, // Important for proper scrolling
-          '& .MuiTableContainer-root': {
+        <Paper 
+          elevation={2}
+          sx={{ 
             flex: '1 1 auto',
-            minHeight: 0, // Important for proper scrolling
-            overflow: 'auto',
-            maxHeight: 'none',
-            '& .MuiTable-root': {
-              minWidth: 700,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            width: '100%',
+            overflow: 'hidden',
+            '& .MuiTableContainer-root': {
+              flex: '1 1 auto',
+              minHeight: 0,
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              '&::-webkit-scrollbar': {
+                height: '8px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                borderRadius: '4px',
+              },
+              '& .MuiTable-root': {
+                minWidth: 'max-content',
+                width: '100%',
+              },
+              '& .MuiTableCell-root': {
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '200px',
+                px: { xs: 1, sm: 2 },
+                py: { xs: 1, sm: 1.5 }
+              },
+              '& .MuiTableHead-root .MuiTableCell-root': {
+                fontWeight: '600',
+                backgroundColor: 'background.paper',
+              }
+            },
+            '& .MuiTablePagination-root': {
+              borderTop: '1px solid rgba(224, 224, 224, 1)',
+              flexShrink: 0
             }
-          }
-        }}>
+          }}
+        >
           <TableContainer>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>Image</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Category</TableCell>
-                  <TableCell align="right">Price</TableCell>
-                  <TableCell align="right">Stock</TableCell>
-                  <TableCell align="right">Rating</TableCell>
-                  <TableCell align="center">Actions</TableCell>
+                  <TableCell sx={{ minWidth: '80px' }}>Image</TableCell>
+                  <TableCell sx={{ minWidth: '150px' }}>Name</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Category</TableCell>
+                  <TableCell align="right" sx={{ minWidth: '120px' }}>Price</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Stock</TableCell>
+                  <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>Rating</TableCell>
+                  <TableCell align="center" sx={{ minWidth: '120px' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -316,36 +351,80 @@ export default function Dashboard() {
                         component="img"
                         src={product.image} 
                         alt={product.name}
-                        sx={{ width: 50, height: 50, objectFit: 'contain' }}
+                        sx={{ 
+                          width: 50, 
+                          height: 50, 
+                          objectFit: 'contain',
+                          display: 'block',
+                          mx: 'auto'
+                        }}
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = 'https://via.placeholder.com/50';
                         }}
                       />
                     </TableCell>
-                    <TableCell>{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell align="right">LKR {product.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                    <TableCell align="right">{product.stock}</TableCell>
-                    <TableCell align="right">{product.rating}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="500">
+                        {product.name}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        color="text.secondary"
+                        sx={{ display: { sm: 'none' } }}
+                      >
+                        {product.category}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                      {product.category}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box>
+                        <Typography variant="body2" fontWeight="500">
+                          LKR {product.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          color="text.secondary"
+                          sx={{ display: { sm: 'none' } }}
+                        >
+                          Stock: {product.stock}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right" sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                      {product.stock}
+                    </TableCell>
+                    <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                      {product.rating}
+                    </TableCell>
                     <TableCell align="center">
                       {currentUser && (
-                        <>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: { xs: 0.5, sm: 1 } }}>
                           <IconButton 
                             color="primary" 
-                            onClick={() => handleOpen(product)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpen(product);
+                            }}
                             size="small"
+                            sx={{ '&:hover': { bgcolor: 'primary.lighter' } }}
                           >
-                            <Edit />
+                            <Edit fontSize="small" />
                           </IconButton>
                           <IconButton 
                             color="error" 
-                            onClick={() => handleDelete(product.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(product.id);
+                            }}
                             size="small"
+                            sx={{ '&:hover': { bgcolor: 'error.lighter' } }}
                           >
-                            <Delete />
+                            <Delete fontSize="small" />
                           </IconButton>
-                        </>
+                        </Box>
                       )}
                     </TableCell>
                   </TableRow>
@@ -356,7 +435,32 @@ export default function Dashboard() {
         </Paper>
       </Container>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        maxWidth="md" 
+        fullWidth
+        fullScreen={window.innerWidth < 600}
+        PaperProps={{
+          sx: {
+            m: { xs: 1, sm: 2 },
+            width: { xs: 'calc(100% - 16px)', sm: 'auto' },
+            maxHeight: { xs: 'calc(100% - 32px)', sm: '90vh' },
+            '& .MuiDialogContent-root': {
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              p: { xs: 1, sm: 3 },
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                borderRadius: '3px',
+              },
+            }
+          }
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
           <DialogContent>
