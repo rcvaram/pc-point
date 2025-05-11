@@ -331,7 +331,7 @@ const Shop = () => {
                       size="small"
                       color="primary"
                       component="a"
-                      href={`https://wa.me/94771234567?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(product.name)}`}
+                      href={`https://wa.me/94779439400?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(product.name)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       fullWidth
