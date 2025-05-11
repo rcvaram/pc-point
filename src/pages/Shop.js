@@ -20,83 +20,18 @@ import {
   Stack,
 } from '@mui/material';
 import { Search, FilterList, ShoppingCart } from '@mui/icons-material';
+import { allProducts, categories } from '../data/products';
 
-// Sample product data - in a real app, this would come from an API
-const categories = [
-  'All Categories',
-  'Processors',
-  'Graphics Cards',
-  'Memory',
-  'Storage',
-  'Motherboards',
-  'Power Supplies',
-  'Cases',
-  'Cooling',
-  'Accessories',
-];
+// Fallback image in case the main image fails to load
+const fallbackImage = 'https://placehold.co/600x400/eee/999999?text=No+Image';
 
-const products = [
-  {
-    id: 1,
-    name: 'Intel Core i9-12900K',
-    category: 'Processors',
-    price: 599.99,
-    image: 'https://via.placeholder.com/300x200?text=Intel+i9-12900K',
-    description: '16-Core, 24-Thread, 3.2 to 5.2 GHz, LGA 1700',
-    stock: 15,
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    name: 'NVIDIA GeForce RTX 4080',
-    category: 'Graphics Cards',
-    price: 1199.99,
-    image: 'https://via.placeholder.com/300x200?text=RTX+4080',
-    description: '16GB GDDR6X, 2.51 GHz Boost Clock',
-    stock: 8,
-    rating: 4.9,
-  },
-  {
-    id: 3,
-    name: 'Samsung 980 Pro 1TB',
-    category: 'Storage',
-    price: 129.99,
-    image: 'https://via.placeholder.com/300x200?text=Samsung+980+Pro',
-    description: 'PCIe 4.0 NVMe M.2 Internal SSD',
-    stock: 25,
-    rating: 4.7,
-  },
-  {
-    id: 4,
-    name: 'Corsair Vengeance RGB Pro 32GB',
-    category: 'Memory',
-    price: 149.99,
-    image: 'https://via.placeholder.com/300x200?text=Corsair+RAM',
-    description: 'DDR4 3600MHz, CL18',
-    stock: 12,
-    rating: 4.8,
-  },
-  {
-    id: 5,
-    name: 'ASUS ROG Strix Z690-E',
-    category: 'Motherboards',
-    price: 429.99,
-    image: 'https://via.placeholder.com/300x200?text=ASUS+Z690',
-    description: 'LGA 1700, Intel Z690, ATX',
-    stock: 7,
-    rating: 4.6,
-  },
-  {
-    id: 6,
-    name: 'NZXT H510 Elite',
-    category: 'Cases',
-    price: 159.99,
-    image: 'https://via.placeholder.com/300x200?text=NZXT+H510',
-    description: 'ATX Mid Tower Case, Tempered Glass',
-    stock: 10,
-    rating: 4.5,
-  },
-];
+// Function to handle image loading errors
+const addDefaultImg = (e) => {
+  e.target.src = fallbackImage;
+};
+
+// Use the products from our data file
+const products = allProducts;
 
 const Shop = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -260,13 +195,22 @@ const Shop = () => {
             {paginatedProducts.map((product) => (
               <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={product.image}
-                    alt={product.name}
-                    sx={{ objectFit: 'contain', p: 2, backgroundColor: '#f9f9f9' }}
-                  />
+                  <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
+                    <CardMedia
+                      component="img"
+                      sx={{
+                        maxHeight: '100%',
+                        width: 'auto',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
+                        p: 2,
+                      }}
+                      src={product.image}
+                      alt={product.name}
+                      onError={addDefaultImg}
+                      loading="lazy"
+                    />
+                  </Box>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h6" component="h3" noWrap>
                       {product.name}

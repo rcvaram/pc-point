@@ -48,14 +48,14 @@ const Footer = () => {
             <Typography variant="h6" color="text.primary" gutterBottom>
               Contact Us
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Email: info@pcpoint.com
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Box component="span" fontWeight="medium">Email:</Box> info@pcpoint.com
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Box component="span" fontWeight="medium">Phone:</Box> 0212250020
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Phone: (123) 456-7890
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              123 Tech Street, Silicon Valley, CA 94025
+              <Box component="span" fontWeight="medium">Address:</Box> No 132, Main Street, Chankanai
             </Typography>
           </Grid>
         </Grid>

@@ -8,20 +8,26 @@ const Navbar = ({ cartCount = 0 }) => {
     <AppBar position="sticky" elevation={1}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Typography
-            variant="h6"
+          <Box 
             component={Link}
             to="/"
             sx={{
-              mr: 2,
-              fontWeight: 700,
-              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
               textDecoration: 'none',
               flexGrow: 1,
             }}
           >
-            PC Point
-          </Typography>
+            <img 
+              src="/logo.jpeg" 
+              alt="PC Point Logo" 
+              style={{
+                height: '50px',
+                width: 'auto',
+                marginRight: '10px',
+              }}
+            />
+          </Box>
           
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button color="inherit" component={Link} to="/">
@@ -30,10 +36,10 @@ const Navbar = ({ cartCount = 0 }) => {
             <Button color="inherit" component={Link} to="/shop">
               Shop
             </Button>
-            <Button color="inherit">
+            <Button color="inherit" component={Link} to="/about">
               About
             </Button>
-            <Button color="inherit">
+            <Button color="inherit" component={Link} to="/contact">
               Contact
             </Button>
             <Button 
