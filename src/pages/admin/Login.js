@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext.js';
 import { 
   Container, 
   Box, 
@@ -28,14 +28,15 @@ export default function Login() {
     try {
       setError('');
       setLoading(true);
+      
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
       console.error('Failed to log in', err);
       setError('Failed to log in. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -89,6 +90,8 @@ export default function Login() {
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
+            
+
           </Box>
         </Paper>
       </Box>

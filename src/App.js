@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { 
   BrowserRouter as Router, 
   Routes, 
@@ -19,6 +19,7 @@ import theme from './theme.js';
 import Layout from './components/layout/Layout.js';
 import { ProductProvider } from './contexts/ProductContext.js';
 import { AuthProvider } from './contexts/AuthContext.js';
+import ProtectedRoute from './components/auth/ProtectedRoute.js';
 
 // Error Boundary component
 class ErrorBoundary extends React.Component {
@@ -58,6 +59,7 @@ const Home = lazy(() => import('./pages/Home.js'));
 const Shop = lazy(() => import('./pages/Shop.js'));
 const About = lazy(() => import('./pages/About.js'));
 const Contact = lazy(() => import('./pages/Contact.js'));
+const Login = lazy(() => import('./pages/admin/Login.js'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard.js'));
 
 // Loading component for Suspense fallback
@@ -72,18 +74,11 @@ const Loading = () => (
   </Box>
 );
 
-const RouteLogger = ({ children }) => {
-  const location = useLocation();
-  
-  useEffect(() => {
-    console.log('Route changed to:', location.pathname);
-  }, [location]);
-
-  return children;
-};
+// Simple wrapper component for potential future route logging
+const RouteLogger = ({ children }) => children;
 
 const AppRoutes = () => {
-  console.log('AppRoutes rendering');
+  // Removed console.log for production
   
   return (
     <ErrorBoundary>
@@ -94,7 +89,17 @@ const AppRoutes = () => {
             <Route path="shop" element={<Shop />} />
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
-            <Route path="admin/dashboard" element={<Dashboard />} />
+            <Route path="admin">
+              <Route path="login" element={<Login />} />
+              <Route 
+                path="dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+            </Route>
             <Route path="*" element={
               <Box p={4}>
                 <Typography variant="h4">404 - Page Not Found</Typography>
@@ -118,7 +123,6 @@ const AppRoutes = () => {
 };
 
 function App() {
-  console.log('App rendering');
   
   return (
     <Router>

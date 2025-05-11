@@ -61,6 +61,13 @@ export default function Dashboard() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [currentUser, navigate]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -131,15 +138,6 @@ export default function Dashboard() {
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
-  };
-
-  const uploadImage = async (file) => {
-    if (!file) return null;
-    
-    const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
   };
 
   const handleSubmit = async (e) => {
@@ -228,36 +226,76 @@ export default function Dashboard() {
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+    <Box 
+      sx={{ 
+        width: '100%',
+        minHeight: '100%',
+        p: 3,
+        backgroundColor: 'white',
+        boxShadow: 1,
+        borderRadius: 1,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <Container 
+        maxWidth={false} 
+        sx={{ 
+          flex: '1 1 auto',
+          py: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0, // Important for proper scrolling
+          '& > * + *': { mt: 2 }
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h4" component="h1">
             Product Management
           </Typography>
           <Box>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              startIcon={<Add />}
-              onClick={() => handleOpen()}
-              sx={{ mr: 2 }}
-            >
-              Add Product
-            </Button>
-            <Button 
-              variant="outlined" 
-              color="error"
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
+            {currentUser && (
+              <>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  startIcon={<Add />}
+                  onClick={() => handleOpen()}
+                  sx={{ mr: 2 }}
+                >
+                  Add Product
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="error"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </>
+            )}
           </Box>
         </Box>
 
-        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
-
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-          <TableContainer sx={{ maxHeight: 600 }}>
+        {error && <Alert severity="error">{error}</Alert>}
+        
+        <Paper sx={{ 
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0, // Important for proper scrolling
+          '& .MuiTableContainer-root': {
+            flex: '1 1 auto',
+            minHeight: 0, // Important for proper scrolling
+            overflow: 'auto',
+            maxHeight: 'none',
+            '& .MuiTable-root': {
+              minWidth: 700,
+            }
+          }
+        }}>
+          <TableContainer>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -291,20 +329,24 @@ export default function Dashboard() {
                     <TableCell align="right">{product.stock}</TableCell>
                     <TableCell align="right">{product.rating}</TableCell>
                     <TableCell align="center">
-                      <IconButton 
-                        color="primary" 
-                        onClick={() => handleOpen(product)}
-                        size="small"
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton 
-                        color="error" 
-                        onClick={() => handleDelete(product.id)}
-                        size="small"
-                      >
-                        <Delete />
-                      </IconButton>
+                      {currentUser && (
+                        <>
+                          <IconButton 
+                            color="primary" 
+                            onClick={() => handleOpen(product)}
+                            size="small"
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton 
+                            color="error" 
+                            onClick={() => handleDelete(product.id)}
+                            size="small"
+                          >
+                            <Delete />
+                          </IconButton>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -312,7 +354,7 @@ export default function Dashboard() {
             </Table>
           </TableContainer>
         </Paper>
-      </Box>
+      </Container>
 
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
@@ -457,6 +499,6 @@ export default function Dashboard() {
           </DialogActions>
         </form>
       </Dialog>
-    </Container>
+    </Box>
   );
 }

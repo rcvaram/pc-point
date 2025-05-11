@@ -13,15 +13,6 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-console.log('Firebase Config:', {
-  hasApiKey: !!process.env.REACT_APP_FIREBASE_API_KEY,
-  hasAuthDomain: !!process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  hasProjectId: !!process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  hasStorageBucket: !!process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  hasMessagingSenderId: !!process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  hasAppId: !!process.env.REACT_APP_FIREBASE_APP_ID
-});
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 

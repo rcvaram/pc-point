@@ -40,7 +40,7 @@ const Contact = () => {
     }
     
     // Here you would typically send the form data to your backend
-    console.log('Form submitted:', formData);
+    // Form submission logic would go here
     
     // Show success message
     setOpen(true);

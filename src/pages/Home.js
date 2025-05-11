@@ -27,18 +27,11 @@ const Home = () => {
   const { featuredProducts, loading, error } = useProducts();
 
   useEffect(() => {
-    console.log('Home component mounted');
-    console.log('Featured products:', featuredProducts);
+    // Removed debug logs
   }, [featuredProducts]);
 
   return (
     <Box>
-      {/* Debug Info */}
-      <Box sx={{ p: 2, bgcolor: 'warning.light', mb: 2, borderRadius: 1 }}>
-        <Typography variant="body2" color="warning.contrastText">
-          Debug: Home component rendered
-        </Typography>
-      </Box>
 
       {/* Hero Section */}
       <Box
