@@ -58,6 +58,7 @@ class ErrorBoundary extends React.Component {
 const Home = lazy(() => import('./pages/Home.js'));
 const Shop = lazy(() => import('./pages/Shop.js'));
 const About = lazy(() => import('./pages/About.js'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail.js'));
 const Contact = lazy(() => import('./pages/Contact.js'));
 const Login = lazy(() => import('./pages/admin/Login.js'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard.js'));
@@ -89,6 +90,11 @@ const AppRoutes = () => {
             <Route path="shop" element={<Shop />} />
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="product/:id" element={
+              <Suspense fallback={<Loading />}>
+                <ProductDetail />
+              </Suspense>
+            } />
             <Route path="admin">
               <Route path="login" element={<Login />} />
               <Route 

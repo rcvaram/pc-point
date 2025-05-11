@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Container, 
@@ -7,99 +8,163 @@ import {
   Card, 
   CardContent, 
   CardMedia, 
-  CardActions, 
-  Button, 
-  TextField, 
-  MenuItem, 
-  InputAdornment, 
-  Pagination, 
-  Select, 
-  FormControl, 
-  InputLabel, 
-  Chip, 
-  Stack,
+  Button,
   CircularProgress,
-  Snackbar,
+  useTheme,
+  Rating,
+  Chip,
+  IconButton,
+  Pagination,
   Alert
 } from '@mui/material';
-import { Search, FilterList } from '@mui/icons-material';
+import { 
+  Star,
+  StarBorder,
+  WhatsApp,
+  Close
+} from '@mui/icons-material';
 import { useProducts } from '../contexts/ProductContext.js';
-import { sortOptions } from '../data/categories.js';
+import { styled } from '@mui/material/styles';
 
-// Fallback image in case the main image fails to load
-const fallbackImage = 'https://placehold.co/600x400/eee/999999?text=No+Image';
+// Fallback image for product thumbnails
+const FALLBACK_IMAGE = 'https://placehold.co/600x400/eee/999999?text=No+Image';
 
-const Shop = () => {
+// Styled Components
+const StyledShopContainer = styled(Container)(({ theme }) => ({
+  paddingTop: theme.spacing(6),
+  paddingBottom: theme.spacing(6),
+  backgroundColor: theme.palette.background.default,
+  [theme.breakpoints.down('sm')]: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
+}));
+
+const DiscountBadge = styled(Chip)(({ theme }) => ({
+  position: 'absolute',
+  top: theme.spacing(1),
+  right: theme.spacing(1),
+  backgroundColor: theme.palette.secondary.main,
+  color: theme.palette.secondary.contrastText,
+  fontWeight: 600,
+  fontSize: '0.75rem',
+  padding: theme.spacing(0.5, 1),
+  height: 'auto',
+}));
+
+const ImageContainer = styled('div')(({ theme }) => ({
+  position: 'relative',
+  paddingTop: '100%',
+  overflow: 'hidden',
+  backgroundColor: theme.palette.background.default,
+  '& img': {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    padding: theme.spacing(2),
+    transition: 'all 0.3s ease',
+  },
+  '&:hover img': {
+    transform: 'scale(1.05)',
+  },
+}));
+
+const StyledRating = styled(Rating)(({ theme }) => ({
+  '& .MuiRating-iconFilled': {
+    color: theme.palette.secondary.main,
+  },
+  '& .MuiRating-iconEmpty': {
+    color: theme.palette.neutral.light,
+  },
+  '& .MuiRating-iconHover': {
+    color: theme.palette.secondary.light,
+  },
+}));
+
+const StyledPageHeader = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+  '& h1': {
+    marginBottom: theme.spacing(1),
+    fontWeight: 600,
+  },
+  '& p': {
+    color: theme.palette.text.secondary,
+  },
+}));
+
+const StyledProductCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  cursor: 'pointer',
+  backgroundColor: theme.palette.background.paper,
+  border: `1px solid ${theme.palette.neutral.light}`,
+  '&:hover': {
+    borderColor: theme.palette.primary.light,
+    borderColor: theme.palette.primary.main,
+  },
+  position: 'relative',
+  '& .MuiCardContent-root': {
+    padding: theme.spacing(2),
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: theme.palette.background.paper,
+    '& .MuiTypography-h6': {
+      fontWeight: 500,
+      color: theme.palette.text.primary,
+      marginBottom: theme.spacing(1),
+      fontSize: '1rem',
+      lineHeight: 1.4,
+    },
+    '& .MuiTypography-body2': {
+      color: theme.palette.text.secondary,
+      marginBottom: theme.spacing(1),
+      fontSize: '0.875rem',
+    },
+    '& .MuiTypography-h5': {
+      fontWeight: 600,
+      marginTop: 'auto',
+      paddingTop: theme.spacing(1),
+      color: theme.palette.primary.main,
+    },
+  },
+  '& .MuiCardMedia-root': {
+    paddingTop: '56.25%', // 16:9 aspect ratio
+    height: 0,
+    position: 'relative',
+    '& img': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+    },
+  },
+}));
+
+function Shop() {
+  const theme = useTheme();
   const { 
-    products, 
+    products = [], 
     loading, 
-    error,
-    categories,
-    loadProductsByCategory,
-    setError
+    error
   } = useProducts();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [sortBy, setSortBy] = useState('featured');
+
   const [page, setPage] = useState(1);
-  const itemsPerPage = 12;
+  const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
-
-  // Handle category change - works with both direct category string and event object
-  const handleCategoryChange = (categoryOrEvent) => {
-    const category = categoryOrEvent?.target?.value || categoryOrEvent;
-    setSelectedCategory(category);
-    setPage(1);
-    if (category === 'All Categories') {
-      setFilteredProducts(products);
-    } else {
-      loadProductsByCategory(category);
-    }
+  const navigate = useNavigate();
+  const itemsPerPage = 12;
+  
+  // Handle product click
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
   };
-
-  // Filter and sort products when filters change or products update
-  useEffect(() => {
-    if (!products || products.length === 0) return;
-
-    let result = [...products];
-
-    // Filter by search term
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      result = result.filter(product => 
-        product.name.toLowerCase().includes(searchLower) ||
-        (product.description && product.description.toLowerCase().includes(searchLower))
-      );
-    }
-
-    // Filter by category is now handled by the context
-    if (selectedCategory !== 'All Categories') {
-      result = result.filter(product => product.category === selectedCategory);
-    }
-
-    // Sort products
-    switch (sortBy) {
-      case 'price-low':
-        result.sort((a, b) => (a.price || 0) - (b.price || 0));
-        break;
-      case 'price-high':
-        result.sort((a, b) => (b.price || 0) - (a.price || 0));
-        break;
-      case 'rating':
-        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'newest':
-        // Sort by ID (assuming higher IDs are newer)
-        result.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-        break;
-      default: // 'featured'
-        // No sorting or default sorting
-        break;
-    }
-
-    setFilteredProducts(result);
-  }, [products, searchTerm, selectedCategory, sortBy]);
 
   // Handle page change
   const handlePageChange = (event, value) => {
@@ -107,291 +172,205 @@ const Shop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle search input change
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  // Filter products based on search query
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+    setPage(1); // Reset to first page when search changes
+  }, [products, searchQuery]);
 
-
-
-  // Handle sort change
-  const handleSortChange = (event) => {
-    setSortBy(event.target.value);
-  };
-
-  // Handle close error alert
-  const handleCloseError = () => {
-    setError('');
-  };
+  // Get search query from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, []);
 
   // Calculate pagination
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // Handle empty state
+  if (filteredProducts.length === 0 && !loading) {
+    return (
+      <Box textAlign="center" py={4}>
+        <Typography variant="h6" color="text.secondary">
+          {searchQuery
+            ? `No products found matching "${searchQuery}"`
+            : 'No products available at the moment.'
+          }
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Render star ratings
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} fontSize="inherit" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<StarBorder key={i} fontSize="inherit" />);
+      } else {
+        stars.push(<StarBorder key={i} fontSize="inherit" style={{ color: theme.palette.text.disabled }} />);
+      }
+    }
+    return stars;
+  };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <StyledShopContainer maxWidth="xl">
+      <StyledPageHeader>
+        <Typography variant="h4" component="h1">
           Shop Computer Parts
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle1">
           Find the perfect components for your next build
         </Typography>
-      </Box>
+      </StyledPageHeader>
 
-      {/* Filters and Search */}
-      <Box sx={{ mb: 4, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          sx={{ minWidth: 300, flexGrow: 1 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        />
-        
-        <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            label="Category"
-            disabled={loading}
-            startAdornment={
-              <InputAdornment position="start">
-                <FilterList fontSize="small" />
-              </InputAdornment>
-            }
-          >
-            <MenuItem value="All Categories">All Categories</MenuItem>
-            {categories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        
-        <FormControl sx={{ minWidth: 200 }} size="small">
-          <InputLabel>Sort By</InputLabel>
-          <Select
-            value={sortBy}
-            onChange={handleSortChange}
-            label="Sort By"
-            disabled={loading}
-          >
-            {sortOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
+      {/* Main content */}
+      <Grid container spacing={3}>
 
-      {/* Active Filters */}
-      {(searchTerm || selectedCategory !== 'All Categories') && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Active Filters:
-          </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-            {searchTerm && (
-              <Chip
-                label={`Search: "${searchTerm}"`}
-                onDelete={() => setSearchTerm('')}
-                size="small"
-              />
-            )}
-            {selectedCategory !== 'All Categories' && (
-              <Chip
-                label={`Category: ${selectedCategory}`}
-                onDelete={() => setSelectedCategory('All Categories')}
-                size="small"
-              />
-            )}
-            <Button 
-              size="small" 
-              color="error" 
-              variant="text" 
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('All Categories');
-                setSortBy('featured');
-              }}
-              sx={{ ml: 1 }}
-            >
-              Clear All
-            </Button>
-          </Stack>
-        </Box>
-      )}
-
-      {/* Product Grid */}
-      {loading ? (
-        <Box display="flex" justifyContent="center" my={8}>
-          <CircularProgress size={60} />
-        </Box>
-      ) : filteredProducts.length === 0 ? (
-        <Box textAlign="center" my={8} width="100%">
-          <Typography variant="h6" color="textSecondary">
-            No products found. Try adjusting your search or filters.
-          </Typography>
-        </Box>
-      ) : (
-        <>
-          <Grid container spacing={4}>
-            {paginatedProducts.map((product) => (
-              <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
-                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ 
-                    height: 200, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    bgcolor: 'background.default',
-                    p: 2
-                  }}>
-                    <CardMedia
-                      component="img"
-                      sx={{
-                        maxHeight: '100%',
-                        width: 'auto',
-                        maxWidth: '100%',
-                        objectFit: 'contain',
-                      }}
-                      src={product.image || fallbackImage}
-                      alt={product.name}
-                      onError={(e) => {
-                        e.target.src = fallbackImage;
-                      }}
-                      loading="lazy"
-                    />
-                  </Box>
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography gutterBottom variant="h6" component="h3" noWrap>
-                      {product.name}
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary" 
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        mb: 1,
-                        minHeight: '2.8em'
-                      }}
-                    >
-                      {product.description}
-                    </Typography>
-                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>
-                      LKR {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Box>
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <span 
-                            key={i} 
-                            style={{ 
-                              color: i <= (product.rating || 0) ? '#ffc107' : '#e0e0e0',
-                              fontSize: '1.2rem'
-                            }}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </Box>
-                      <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                        ({(product.rating || 0).toFixed(1)})
+        {/* Products grid */}
+        <Grid item xs={12}>
+          {loading ? (
+            <Box display="flex" justifyContent="center" my={4}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error">{error}</Alert>
+          ) : (
+            <Grid container spacing={3}>
+              {paginatedProducts.map((product) => (
+                <Grid item xs={12} sm={6} lg={4} xl={3} key={product.id}>
+                  <StyledProductCard onClick={() => handleProductClick(product.id)}>
+                    <ImageContainer>
+                      <img 
+                        src={product.image || FALLBACK_IMAGE} 
+                        alt={product.name}
+                        onError={(e) => {
+                          e.target.src = FALLBACK_IMAGE;
+                        }}
+                      />
+                    </ImageContainer>
+                    <CardContent>
+                      <Typography 
+                        gutterBottom 
+                        variant="subtitle1" 
+                        component="h3"
+                        sx={{
+                          fontWeight: 600,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          minHeight: '3em',
+                        }}
+                      >
+                        {product.name}
                       </Typography>
-                    </Box>
-                    <Chip 
-                      label={product.stock > 0 ? 'In Stock' : 'Out of Stock'} 
-                      size="small" 
-                      color={product.stock > 0 ? 'success' : 'default'}
-                      variant="outlined"
-                      sx={{ mb: 2 }}
-                    />
-                  </CardContent>
-                  <CardActions sx={{ p: 2, pt: 0 }}>
-                    <Button
-                      size="small"
-                      color="primary"
-                      component="a"
-                      href={`https://wa.me/94779439400?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(product.name)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      fullWidth
-                      variant="contained"
-                      disabled={!product.stock}
-                      sx={{
-                        backgroundColor: product.stock > 0 ? '#25D366' : 'grey.400',
-                        '&:hover': {
-                          backgroundColor: product.stock > 0 ? '#128C7E' : 'grey.500',
-                        },
-                        color: 'white',
-                        textTransform: 'none',
-                        py: 1,
-                      }}
-                      startIcon={
-                        <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.5 14.4l-2.6-1.2c-.2-.1-.4-.1-.6 0l-1.3.8c-.2.1-.4.1-.6 0-1.5-.8-2.7-2.1-3.4-3.6 0-.2 0-.4.1-.6v-.6l.8-1.3c.1-.2.1-.4 0-.6l-2.6-4.8c-.1-.3-.4-.4-.6-.3l-3.7 1c-.2.1-.3.3-.3.5 0 8.6 7 15.5 15.5 15.5.2 0 .4-.1.5-.3l1-3.7c.1-.2 0-.5-.2-.6z"/>
-                            <path d="M20.5 3.5c-1.2-1.2-2.8-1.9-4.5-1.9-3.6 0-6.5 2.9-6.5 6.5 0 .6.1 1.2.2 1.8l-1.4 2.5c-.1.2 0 .5.2.6 1.5.8 3.2 1.2 4.9 1.2 3.6 0 6.5-2.9 6.5-6.5 0-1.7-.7-3.3-1.9-4.5z"/>
-                          </svg>
+                      
+                      <Box display="flex" alignItems="center" mb={1.5}>
+                        <Box display="flex" alignItems="center" mr={1}>
+                          {renderStars(product.rating || 0)}
                         </Box>
-                      }
-                    >
-                      {product.stock > 0 ? 'Contact on WhatsApp' : 'Out of Stock'}
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                        <Typography variant="body2" color="text.secondary">
+                          ({product.reviewCount || 0} reviews)
+                        </Typography>
+                      </Box>
+                      
+                      <Box mt="auto">
+                        <Typography variant="h6" color="primary" fontWeight={700} mb={2}>
+                          ${product.price?.toFixed(2) || '0.00'}
+                          {product.originalPrice && (
+                            <Typography 
+                              component="span" 
+                              variant="body2" 
+                              color="text.secondary"
+                              sx={{
+                                textDecoration: 'line-through',
+                                ml: 1,
+                                display: 'inline-block'
+                              }}
+                            >
+                              ${product.originalPrice.toFixed(2)}
+                            </Typography>
+                          )}
+                        </Typography>
+                        
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="success"
+                          size="medium"
+                          startIcon={<WhatsApp />}
+                          onClick={() => {
+                            const phoneNumber = '+94779439400'; // WhatsApp number
+                            const message = `Hi, I'm interested in this product: ${product.name} (${product.id})`;
+                            const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                            window.open(url, '_blank');
+                          }}
+                          sx={{
+                            mt: 'auto',
+                            py: 1,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            backgroundColor: '#25D366',
+                            '&:hover': {
+                              backgroundColor: '#128C7E',
+                              transform: 'translateY(-1px)',
+                              boxShadow: 2,
+                            },
+                            transition: 'all 0.2s ease-in-out',
+                          }}
+                        >
+                          Contact on WhatsApp
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </StyledProductCard>
+                </Grid>
+              ))}
+            </Grid>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+            <Box display="flex" justifyContent="center" mt={4} width="100%">
               <Pagination
                 count={totalPages}
                 page={page}
                 onChange={handlePageChange}
                 color="primary"
-                showFirstButton
+                showFirstButton 
                 showLastButton
               />
             </Box>
           )}
-        </>
-      )}
+          
 
-      {/* Error Snackbar */}
-      <Snackbar 
-        open={!!error} 
-        autoHideDuration={6000} 
-        onClose={handleCloseError}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
-          {error}
-        </Alert>
-      </Snackbar>
-    </Container>
+
+
+        </Grid>
+      </Grid>
+    </StyledShopContainer>
   );
-};
+}
 
 export default Shop;
