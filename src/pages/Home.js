@@ -110,7 +110,7 @@ const Home = () => {
                     {product.description}
                   </Typography>
                   <Typography variant="h6" color="primary">
-                    ${product.price.toFixed(2)}
+                    LKR {product.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Typography>
                 </CardContent>
                 <CardActions>
@@ -164,7 +164,7 @@ const Home = () => {
                   🚚 Free Shipping
                 </Typography>
                 <Typography>
-                  On all orders over $50
+                  On all orders over LKR 10,000
                 </Typography>
               </Box>
             </Grid>

@@ -88,7 +88,9 @@ export default function Dashboard() {
         category: product.category,
         stock: product.stock,
         rating: product.rating,
-        image: product.image
+        image: product.image,
+        // Include the existing createdAt for updates
+        createdAt: product.createdAt
       });
       setPreviewUrl(product.image);
       setEditingProduct(product.id);
@@ -160,6 +162,7 @@ export default function Dashboard() {
         }
       }
 
+      // Create base product data
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -168,13 +171,19 @@ export default function Dashboard() {
         stock: parseInt(formData.stock, 10),
         rating: formData.rating ? parseFloat(formData.rating) : 0,
         image: imageUrl,
-        createdAt: editingProduct ? formData.createdAt : new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
+      // Only set createdAt for new products
+      if (!editingProduct) {
+        productData.createdAt = new Date().toISOString();
+      }
+      // For updates, we don't include createdAt in the update operation at all
+
       if (editingProduct) {
-        // Update existing product
-        await updateDoc(doc(db, 'products', editingProduct), productData);
+        // Update existing product - explicitly specify fields to update
+        const { createdAt, ...updateData } = productData; // Remove createdAt if it exists
+        await updateDoc(doc(db, 'products', editingProduct), updateData);
       } else {
         // Add new product
         await addDoc(collection(db, 'products'), productData);
@@ -278,7 +287,7 @@ export default function Dashboard() {
                     </TableCell>
                     <TableCell>{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell align="right">${product.price.toFixed(2)}</TableCell>
+                    <TableCell align="right">LKR {product.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell align="right">{product.stock}</TableCell>
                     <TableCell align="right">{product.rating}</TableCell>
                     <TableCell align="center">

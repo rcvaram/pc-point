@@ -20,16 +20,16 @@ export const sortOptions = [
 
 export const initialFilters = {
   category: 'All Categories',
-  priceRange: [0, 5000],
+  priceRange: [0, 500000],
   inStock: false,
   rating: 0
 };
 
 export const priceMarks = [
-  { value: 0, label: '$0' },
-  { value: 1000, label: '$1000' },
-  { value: 2000, label: '$2000' },
-  { value: 3000, label: '$3000' },
-  { value: 4000, label: '$4000' },
-  { value: 5000, label: '$5000+' },
+  { value: 0, label: 'LKR 0' },
+  { value: 25000, label: 'LKR 25,000' },
+  { value: 50000, label: 'LKR 50,000' },
+  { value: 100000, label: 'LKR 100,000' },
+  { value: 200000, label: 'LKR 200,000' },
+  { value: 500000, label: 'LKR 500,000+' },
 ];

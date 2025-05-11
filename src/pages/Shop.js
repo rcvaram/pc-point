@@ -298,7 +298,7 @@ const Shop = () => {
                       {product.description}
                     </Typography>
                     <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>
-                      ${product.price?.toFixed(2) || '0.00'}
+                      LKR {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Box>
