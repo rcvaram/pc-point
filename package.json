@@ -5,6 +5,11 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@firebase/app": "^0.12.1",
+    "@firebase/auth": "^1.10.2",
+    "@firebase/firestore": "^4.7.12",
+    "@firebase/storage": "^0.13.8",
+    "@hookform/resolvers": "^5.0.1",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@testing-library/dom": "^10.4.0",
@@ -12,18 +17,27 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.9.0",
+    "dotenv": "^16.4.5",
+    "firebase": "^11.7.1",
+    "formik": "^2.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-firebase-hooks": "^5.1.1",
+    "react-hook-form": "^7.56.3",
     "react-router-dom": "^7.6.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "yup": "^1.6.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "upload:products": "node scripts/uploadProducts.js",
+    "setup:firestore": "node scripts/setupFirestore.js"
   },
+  "type": "module",
   "eslintConfig": {
     "extends": [
       "react-app",

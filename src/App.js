@@ -1,14 +1,64 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { CssBaseline, ThemeProvider, CircularProgress, Box } from '@mui/material';
-import theme from './theme';
-import Layout from './components/layout/Layout';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { 
+  BrowserRouter as Router, 
+  Routes, 
+  Route, 
+  Link as RouterLink, 
+  Outlet,
+  useLocation 
+} from 'react-router-dom';
+import { 
+  CssBaseline, 
+  ThemeProvider, 
+  CircularProgress, 
+  Box, 
+  Typography, 
+  Button 
+} from '@mui/material';
+import theme from './theme.js';
+import Layout from './components/layout/Layout.js';
+import { ProductProvider } from './contexts/ProductContext.js';
+import { AuthProvider } from './contexts/AuthContext.js';
+
+// Error Boundary component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box p={4}>
+          <Typography variant="h5" color="error">
+            Something went wrong
+          </Typography>
+          <Typography variant="body1" mt={2}>
+            {this.state.error?.message}
+          </Typography>
+        </Box>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Lazy load the pages for better performance
-const Home = lazy(() => import('./pages/Home'));
-const Shop = lazy(() => import('./pages/Shop'));
-const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
+const Home = lazy(() => import('./pages/Home.js'));
+const Shop = lazy(() => import('./pages/Shop.js'));
+const About = lazy(() => import('./pages/About.js'));
+const Contact = lazy(() => import('./pages/Contact.js'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard.js'));
 
 // Loading component for Suspense fallback
 const Loading = () => (
@@ -22,23 +72,67 @@ const Loading = () => (
   </Box>
 );
 
-function App() {
+const RouteLogger = ({ children }) => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    console.log('Route changed to:', location.pathname);
+  }, [location]);
+
+  return children;
+};
+
+const AppRoutes = () => {
+  console.log('AppRoutes rendering');
+  
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Layout>
-          <Suspense fallback={<Loading />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-      </Router>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <RouteLogger>
+        <Routes>
+          <Route path="/" element={<Layout><Outlet /></Layout>}>
+            <Route index element={<Home />} />
+            <Route path="shop" element={<Shop />} />
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="admin/dashboard" element={<Dashboard />} />
+            <Route path="*" element={
+              <Box p={4}>
+                <Typography variant="h4">404 - Page Not Found</Typography>
+                <Typography>The page you're looking for doesn't exist.</Typography>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  component={RouterLink} 
+                  to="/"
+                  sx={{ mt: 2 }}
+                >
+                  Go to Home
+                </Button>
+              </Box>
+            } />
+          </Route>
+        </Routes>
+      </RouteLogger>
+    </ErrorBoundary>
+  );
+};
+
+function App() {
+  console.log('App rendering');
+  
+  return (
+    <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <ProductProvider>
+            <Suspense fallback={<Loading />}>
+              <AppRoutes />
+            </Suspense>
+          </ProductProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 

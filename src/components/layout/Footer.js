@@ -17,7 +17,7 @@ const Footer = () => {
     >
       <Container maxWidth="lg">
         <Grid container spacing={4}>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={4} md={4}>
             <Typography variant="h6" color="text.primary" gutterBottom>
               PC Point
             </Typography>
@@ -25,7 +25,7 @@ const Footer = () => {
               Your one-stop shop for high-quality computer parts and accessories.
             </Typography>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={4} md={4}>
             <Typography variant="h6" color="text.primary" gutterBottom>
               Quick Links
             </Typography>
@@ -44,7 +44,7 @@ const Footer = () => {
               </MuiLink>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={4} md={4}>
             <Typography variant="h6" color="text.primary" gutterBottom>
               Contact Us
             </Typography>

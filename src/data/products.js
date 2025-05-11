@@ -9,6 +9,10 @@ const productImages = {
   ram: 'https://images.unsplash.com/photo-1591488320449-011701bb6701?w=600&auto=format&fit=crop&q=80',
   motherboard: 'https://images.unsplash.com/photo-1587202372775-e229c3a8cce7?w=600&auto=format&fit=crop&q=80',
   case: 'https://images.unsplash.com/photo-1593501596939-53f06112a8e4?w=600&auto=format&fit=crop&q=80',
+  mouse: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=600&auto=format&fit=crop&q=80',
+  headset: 'https://images.unsplash.com/photo-1509460913899-1f153963b61f?w=600&auto=format&fit=crop&q=80',
+  cooling: 'https://images.unsplash.com/photo-1591488320630-2d1d609a1a2a?w=600&auto=format&fit=crop&q=80',
+  psu: 'https://images.unsplash.com/photo-1591488320630-2d1d609a1a2a?w=600&auto=format&fit=crop&q=80',
 };
 
 // Featured products for the home page
@@ -108,6 +112,66 @@ export const allProducts = [
     stock: 10,
     rating: 4.5,
   },
+  {
+    id: 10,
+    name: 'Logitech G Pro X Superlight',
+    category: 'Accessories',
+    price: 149.99,
+    image: productImages.mouse,
+    description: 'Ultra-lightweight wireless gaming mouse (63g)',
+    stock: 20,
+    rating: 4.8,
+  },
+  {
+    id: 11,
+    name: 'SteelSeries Arctis Pro',
+    category: 'Accessories',
+    price: 179.99,
+    image: productImages.headset,
+    description: 'High-fidelity gaming headset with DTS Headphone:X v2.0',
+    stock: 12,
+    rating: 4.7,
+  },
+  {
+    id: 12,
+    name: 'NZXT Kraken X63',
+    category: 'Cooling',
+    price: 149.99,
+    image: productImages.cooling,
+    description: '280mm AIO Liquid CPU Cooler with RGB',
+    stock: 8,
+    rating: 4.6,
+  },
+  {
+    id: 13,
+    name: 'Corsair RM850x',
+    category: 'Power Supplies',
+    price: 149.99,
+    image: productImages.psu,
+    description: '850W 80+ Gold Certified Fully Modular PSU',
+    stock: 15,
+    rating: 4.8,
+  },
+  {
+    id: 14,
+    name: 'AMD Ryzen 7 5800X3D',
+    category: 'Processors',
+    price: 449.99,
+    image: productImages.processor,
+    description: '8-Core, 16-Thread Desktop Processor with 3D V-Cache',
+    stock: 10,
+    rating: 4.9,
+  },
+  {
+    id: 15,
+    name: 'Samsung Odyssey G7',
+    category: 'Monitors',
+    price: 699.99,
+    image: productImages.monitor,
+    description: '32" QHD 240Hz Curved Gaming Monitor',
+    stock: 5,
+    rating: 4.7,
+  },
 ];
 
 export const categories = [
@@ -121,4 +185,6 @@ export const categories = [
   'Cases',
   'Accessories',
   'Monitors',
+  'Cooling',
+  'Power Supplies'
 ];

@@ -75,27 +75,27 @@ const Contact = () => {
 
       <Grid container spacing={4}>
         <Grid item xs={12} md={5}>
-          <Paper elevation={3} sx={{ p: 4, height: '100%', borderRadius: 2 }}>
-            <Typography variant="h5" gutterBottom>Get in Touch</Typography>
-            <Typography variant="body1" paragraph>
+          <Paper elevation={3} sx={{ p: 4, height: '100%', borderRadius: 2, boxShadow: 3 }}>
+            <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 'bold' }}>Get in Touch</Typography>
+            <Typography variant="body1" paragraph sx={{ mb: 4, color: 'text.secondary' }}>
               Have questions about our products or services? Fill out the form and our team will get back to you as soon as possible.
             </Typography>
             
-            <Box mt={4}>
-              <Box display="flex" alignItems="center" mb={3}>
-                <LocationOn color="primary" sx={{ mr: 2 }} />
+            <Box sx={{ '& > :not(style)': { mb: 3 } }}>
+              <Box display="flex" alignItems="flex-start">
+                <LocationOn color="primary" sx={{ mr: 2, mt: 0.5, fontSize: 24 }} />
                 <Box>
-                  <Typography variant="subtitle2">Address</Typography>
+                  <Typography variant="subtitle1" fontWeight="medium">Address</Typography>
                   <Typography variant="body2" color="text.secondary">
                     No 132, Main Street, Chankanai
                   </Typography>
                 </Box>
               </Box>
               
-              <Box display="flex" alignItems="center" mb={3}>
-                <Phone color="primary" sx={{ mr: 2 }} />
+              <Box display="flex" alignItems="center">
+                <Phone color="primary" sx={{ mr: 2, fontSize: 24 }} />
                 <Box>
-                  <Typography variant="subtitle2">Phone</Typography>
+                  <Typography variant="subtitle1" fontWeight="medium">Phone</Typography>
                   <Typography variant="body2" color="text.secondary">
                     0212250020
                   </Typography>
@@ -103,9 +103,9 @@ const Contact = () => {
               </Box>
               
               <Box display="flex" alignItems="center">
-                <Email color="primary" sx={{ mr: 2 }} />
+                <Email color="primary" sx={{ mr: 2, fontSize: 24 }} />
                 <Box>
-                  <Typography variant="subtitle2">Email</Typography>
+                  <Typography variant="subtitle1" fontWeight="medium">Email</Typography>
                   <Typography variant="body2" color="text.secondary">
                     info@pcpoint.com
                   </Typography>
@@ -116,7 +116,7 @@ const Contact = () => {
         </Grid>
         
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 2, boxShadow: 3, height: '100%' }}>
             <form onSubmit={handleSubmit}>
               {error && (
                 <Alert severity="error" sx={{ mb: 3 }}>
@@ -134,6 +134,8 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     variant="outlined"
+                    size="medium"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1 } }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -146,6 +148,8 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     variant="outlined"
+                    size="medium"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1 } }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -156,6 +160,8 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     variant="outlined"
+                    size="medium"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1 } }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -169,6 +175,8 @@ const Contact = () => {
                     multiline
                     rows={6}
                     variant="outlined"
+                    size="medium"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1 } }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -178,6 +186,18 @@ const Contact = () => {
                     color="primary"
                     size="large"
                     startIcon={<Send />}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 1,
+                      textTransform: 'none',
+                      fontWeight: 'medium',
+                      '&:hover': {
+                        transform: 'translateY(-1px)',
+                        boxShadow: 2,
+                      },
+                      transition: 'all 0.2s'
+                    }}
                   >
                     Send Message
                   </Button>

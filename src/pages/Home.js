@@ -1,7 +1,18 @@
-import React from 'react';
-import { Box, Button, Container, Grid, Typography, Card, CardContent, CardMedia, CardActions } from '@mui/material';
+import React, { useEffect } from 'react';
+import { 
+  Box, 
+  Button, 
+  Container, 
+  Grid, 
+  Typography, 
+  Card, 
+  CardContent, 
+  CardMedia, 
+  CardActions,
+  CircularProgress
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { featuredProducts } from '../data/products';
+import { useProducts } from '../contexts/ProductContext.js';
 
 // Fallback image in case the main image fails to load
 const fallbackImage = 'https://placehold.co/600x400/eee/999999?text=No+Image';
@@ -13,9 +24,22 @@ const addDefaultImg = (e) => {
 
 const Home = () => {
   const navigate = useNavigate();
+  const { featuredProducts, loading, error } = useProducts();
+
+  useEffect(() => {
+    console.log('Home component mounted');
+    console.log('Featured products:', featuredProducts);
+  }, [featuredProducts]);
 
   return (
     <Box>
+      {/* Debug Info */}
+      <Box sx={{ p: 2, bgcolor: 'warning.light', mb: 2, borderRadius: 1 }}>
+        <Typography variant="body2" color="warning.contrastText">
+          Debug: Home component rendered
+        </Typography>
+      </Box>
+
       {/* Hero Section */}
       <Box
         sx={{
@@ -44,13 +68,22 @@ const Home = () => {
         </Container>
       </Box>
 
-      {/* Featured Products */}
-      <Container sx={{ py: 8 }} maxWidth="lg">
-        <Typography variant="h4" component="h2" align="center" gutterBottom>
+      {/* Featured Products Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h4" component="h2" gutterBottom align="center">
           Featured Products
         </Typography>
-        <Grid container spacing={4}>
-          {featuredProducts.map((product) => (
+        
+        {loading ? (
+          <Box display="flex" justifyContent="center" my={4}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography color="error" align="center">{error}</Typography>
+        ) : (
+          <Grid container spacing={4}>
+            {featuredProducts && featuredProducts.length > 0 ? (
+              featuredProducts.map((product) => (
             <Grid item key={product.id} xs={12} sm={6} md={4}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
@@ -81,17 +114,44 @@ const Home = () => {
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button size="small" color="primary">
-                    Add to Cart
-                  </Button>
-                  <Button size="small" color="primary">
-                    Learn More
+                  <Button
+                    size="small"
+                    color="primary"
+                    component="a"
+                    href={`https://wa.me/94771234567?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(product.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    fullWidth
+                    variant="contained"
+                    sx={{
+                      backgroundColor: '#25D366',
+                      '&:hover': {
+                        backgroundColor: '#128C7E',
+                      },
+                      color: 'white',
+                    }}
+                    startIcon={
+                      <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.5 14.4l-2.6-1.2c-.2-.1-.4-.1-.6 0l-1.3.8c-.2.1-.4.1-.6 0-1.5-.8-2.7-2.1-3.4-3.6 0-.2 0-.4.1-.6v-.6l.8-1.3c.1-.2.1-.4 0-.6l-2.6-4.8c-.1-.3-.4-.4-.6-.3l-3.7 1c-.2.1-.3.3-.3.5 0 8.6 7 15.5 15.5 15.5.2 0 .4-.1.5-.3l1-3.7c.1-.2 0-.5-.2-.6z"/>
+                          <path d="M20.5 3.5c-1.2-1.2-2.8-1.9-4.5-1.9-3.6 0-6.5 2.9-6.5 6.5 0 .6.1 1.2.2 1.8l-1.4 2.5c-.1.2 0 .5.2.6 1.5.8 3.2 1.2 4.9 1.2 3.6 0 6.5-2.9 6.5-6.5 0-1.7-.7-3.3-1.9-4.5z"/>
+                        </svg>
+                      </Box>
+                    }
+                  >
+                    Contact on WhatsApp
                   </Button>
                 </CardActions>
               </Card>
             </Grid>
-          ))}
-        </Grid>
+              ))
+            ) : (
+              <Typography variant="body1" align="center" width="100%" my={4}>
+                No featured products available
+              </Typography>
+            )}
+          </Grid>
+        )}
       </Container>
 
       {/* Features Section */}

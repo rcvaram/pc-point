@@ -1,82 +1,136 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
-  Button,
-  TextField,
-  MenuItem,
-  InputAdornment,
-  Pagination,
-  Select,
-  FormControl,
-  InputLabel,
-  Chip,
+import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Container, 
+  Grid, 
+  Typography, 
+  Card, 
+  CardContent, 
+  CardMedia, 
+  CardActions, 
+  Button, 
+  TextField, 
+  MenuItem, 
+  InputAdornment, 
+  Pagination, 
+  Select, 
+  FormControl, 
+  InputLabel, 
+  Chip, 
   Stack,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
-import { Search, FilterList, ShoppingCart } from '@mui/icons-material';
-import { allProducts, categories } from '../data/products';
+import { Search, FilterList } from '@mui/icons-material';
+import { useProducts } from '../contexts/ProductContext.js';
+import { sortOptions } from '../data/categories.js';
 
 // Fallback image in case the main image fails to load
 const fallbackImage = 'https://placehold.co/600x400/eee/999999?text=No+Image';
 
-// Function to handle image loading errors
-const addDefaultImg = (e) => {
-  e.target.src = fallbackImage;
-};
-
-// Use the products from our data file
-const products = allProducts;
-
 const Shop = () => {
+  const { 
+    products, 
+    loading, 
+    error,
+    categories,
+    loadProductsByCategory,
+    setError
+  } = useProducts();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [sortBy, setSortBy] = useState('featured');
   const [page, setPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 12;
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // Filter products based on search term and selected category
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All Categories' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Handle category change - works with both direct category string and event object
+  const handleCategoryChange = (categoryOrEvent) => {
+    const category = categoryOrEvent?.target?.value || categoryOrEvent;
+    setSelectedCategory(category);
+    setPage(1);
+    if (category === 'All Categories') {
+      setFilteredProducts(products);
+    } else {
+      loadProductsByCategory(category);
+    }
+  };
 
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  // Filter and sort products when filters change or products update
+  useEffect(() => {
+    if (!products || products.length === 0) return;
+
+    let result = [...products];
+
+    // Filter by search term
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      result = result.filter(product => 
+        product.name.toLowerCase().includes(searchLower) ||
+        (product.description && product.description.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Filter by category is now handled by the context
+    if (selectedCategory !== 'All Categories') {
+      result = result.filter(product => product.category === selectedCategory);
+    }
+
+    // Sort products
     switch (sortBy) {
       case 'price-low':
-        return a.price - b.price;
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
       case 'price-high':
-        return b.price - a.price;
-      case 'name-asc':
-        return a.name.localeCompare(b.name);
-      case 'name-desc':
-        return b.name.localeCompare(a.name);
+        result.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
       case 'rating':
-        return b.rating - a.rating;
-      default:
-        return 0; // 'featured' - keep original order
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'newest':
+        // Sort by ID (assuming higher IDs are newer)
+        result.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+        break;
+      default: // 'featured'
+        // No sorting or default sorting
+        break;
     }
-  });
 
-  // Pagination
-  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
-  const paginatedProducts = sortedProducts.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage
-  );
+    setFilteredProducts(result);
+  }, [products, searchTerm, selectedCategory, sortBy]);
 
+  // Handle page change
   const handlePageChange = (event, value) => {
     setPage(value);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Handle search input change
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+
+
+  // Handle sort change
+  const handleSortChange = (event) => {
+    setSortBy(event.target.value);
+  };
+
+  // Handle close error alert
+  const handleCloseError = () => {
+    setError('');
+  };
+
+  // Calculate pagination
+  const paginatedProducts = filteredProducts.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -96,10 +150,7 @@ const Shop = () => {
           size="small"
           placeholder="Search products..."
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setPage(1); // Reset to first page when searching
-          }}
+          onChange={handleSearchChange}
           sx={{ minWidth: 300, flexGrow: 1 }}
           InputProps={{
             startAdornment: (
@@ -114,17 +165,16 @@ const Shop = () => {
           <InputLabel>Category</InputLabel>
           <Select
             value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              setPage(1); // Reset to first page when changing category
-            }}
+            onChange={handleCategoryChange}
             label="Category"
+            disabled={loading}
             startAdornment={
               <InputAdornment position="start">
                 <FilterList fontSize="small" />
               </InputAdornment>
             }
           >
+            <MenuItem value="All Categories">All Categories</MenuItem>
             {categories.map((category) => (
               <MenuItem key={category} value={category}>
                 {category}
@@ -133,19 +183,19 @@ const Shop = () => {
           </Select>
         </FormControl>
         
-        <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+        <FormControl sx={{ minWidth: 200 }} size="small">
           <InputLabel>Sort By</InputLabel>
           <Select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={handleSortChange}
             label="Sort By"
+            disabled={loading}
           >
-            <MenuItem value="featured">Featured</MenuItem>
-            <MenuItem value="price-low">Price: Low to High</MenuItem>
-            <MenuItem value="price-high">Price: High to Low</MenuItem>
-            <MenuItem value="name-asc">Name: A to Z</MenuItem>
-            <MenuItem value="name-desc">Name: Z to A</MenuItem>
-            <MenuItem value="rating">Highest Rated</MenuItem>
+            {sortOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>
@@ -189,13 +239,30 @@ const Shop = () => {
       )}
 
       {/* Product Grid */}
-      {paginatedProducts.length > 0 ? (
+      {loading ? (
+        <Box display="flex" justifyContent="center" my={8}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : filteredProducts.length === 0 ? (
+        <Box textAlign="center" my={8} width="100%">
+          <Typography variant="h6" color="textSecondary">
+            No products found. Try adjusting your search or filters.
+          </Typography>
+        </Box>
+      ) : (
         <>
-          <Grid container spacing={4} sx={{ mb: 4 }}>
+          <Grid container spacing={4}>
             {paginatedProducts.map((product) => (
               <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
+                  <Box sx={{ 
+                    height: 200, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    bgcolor: 'background.default',
+                    p: 2
+                  }}>
                     <CardMedia
                       component="img"
                       sx={{
@@ -203,11 +270,12 @@ const Shop = () => {
                         width: 'auto',
                         maxWidth: '100%',
                         objectFit: 'contain',
-                        p: 2,
                       }}
-                      src={product.image}
+                      src={product.image || fallbackImage}
                       alt={product.name}
-                      onError={addDefaultImg}
+                      onError={(e) => {
+                        e.target.src = fallbackImage;
+                      }}
                       loading="lazy"
                     />
                   </Box>
@@ -215,45 +283,79 @@ const Shop = () => {
                     <Typography gutterBottom variant="h6" component="h3" noWrap>
                       {product.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      height: '2.8em',
-                    }}>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      sx={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        mb: 1,
+                        minHeight: '2.8em'
+                      }}
+                    >
                       {product.description}
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="h6" color="primary">
-                        ${product.price.toFixed(2)}
-                      </Typography>
-                      <Typography variant="body2" color={product.stock > 0 ? 'success.main' : 'error.main'}>
-                        {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Box sx={{ color: 'warning.main', display: 'flex' }}>
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} style={{ color: i < Math.floor(product.rating) ? 'orange' : '#ddd' }}>★</span>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold', mb: 2 }}>
+                      ${product.price?.toFixed(2) || '0.00'}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Box>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <span 
+                            key={i} 
+                            style={{ 
+                              color: i <= (product.rating || 0) ? '#ffc107' : '#e0e0e0',
+                              fontSize: '1.2rem'
+                            }}
+                          >
+                            ★
+                          </span>
                         ))}
                       </Box>
-                      <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                        ({product.rating.toFixed(1)})
+                      <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                        ({(product.rating || 0).toFixed(1)})
                       </Typography>
                     </Box>
+                    <Chip 
+                      label={product.stock > 0 ? 'In Stock' : 'Out of Stock'} 
+                      size="small" 
+                      color={product.stock > 0 ? 'success' : 'default'}
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
-                    <Button 
-                      size="small" 
-                      color="primary" 
-                      variant="contained" 
+                    <Button
+                      size="small"
+                      color="primary"
+                      component="a"
+                      href={`https://wa.me/94771234567?text=Hi,%20I'm%20interested%20in%20${encodeURIComponent(product.name)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       fullWidth
-                      startIcon={<ShoppingCart />}
-                      disabled={product.stock === 0}
+                      variant="contained"
+                      disabled={!product.stock}
+                      sx={{
+                        backgroundColor: product.stock > 0 ? '#25D366' : 'grey.400',
+                        '&:hover': {
+                          backgroundColor: product.stock > 0 ? '#128C7E' : 'grey.500',
+                        },
+                        color: 'white',
+                        textTransform: 'none',
+                        py: 1,
+                      }}
+                      startIcon={
+                        <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.5 14.4l-2.6-1.2c-.2-.1-.4-.1-.6 0l-1.3.8c-.2.1-.4.1-.6 0-1.5-.8-2.7-2.1-3.4-3.6 0-.2 0-.4.1-.6v-.6l.8-1.3c.1-.2.1-.4 0-.6l-2.6-4.8c-.1-.3-.4-.4-.6-.3l-3.7 1c-.2.1-.3.3-.3.5 0 8.6 7 15.5 15.5 15.5.2 0 .4-.1.5-.3l1-3.7c.1-.2 0-.5-.2-.6z"/>
+                            <path d="M20.5 3.5c-1.2-1.2-2.8-1.9-4.5-1.9-3.6 0-6.5 2.9-6.5 6.5 0 .6.1 1.2.2 1.8l-1.4 2.5c-.1.2 0 .5.2.6 1.5.8 3.2 1.2 4.9 1.2 3.6 0 6.5-2.9 6.5-6.5 0-1.7-.7-3.3-1.9-4.5z"/>
+                          </svg>
+                        </Box>
+                      }
                     >
-                      {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      {product.stock > 0 ? 'Contact on WhatsApp' : 'Out of Stock'}
                     </Button>
                   </CardActions>
                 </Card>
@@ -262,36 +364,32 @@ const Shop = () => {
           </Grid>
 
           {/* Pagination */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
-            <Pagination
-              count={totalPages}
-              page={page}
-              onChange={handlePageChange}
-              color="primary"
-              showFirstButton
-              showLastButton
-            />
-          </Box>
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
+          )}
         </>
-      ) : (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
-            No products found matching your criteria.
-          </Typography>
-          <Button 
-            variant="outlined" 
-            color="primary" 
-            sx={{ mt: 2 }}
-            onClick={() => {
-              setSearchTerm('');
-              setSelectedCategory('All Categories');
-              setSortBy('featured');
-            }}
-          >
-            Clear Filters
-          </Button>
-        </Box>
       )}
+
+      {/* Error Snackbar */}
+      <Snackbar 
+        open={!!error} 
+        autoHideDuration={6000} 
+        onClose={handleCloseError}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
