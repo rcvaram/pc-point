@@ -136,11 +136,11 @@ const ProductCard = ({ product }) => {
         
         <PriceContainer>
           <Typography variant="h6" color="primary" fontWeight={700}>
-            ${price?.toFixed(2) || '0.00'}
+            LKR {price?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
           </Typography>
           {hasDiscount && (
             <OriginalPrice variant="body2">
-              ${originalPrice.toFixed(2)}
+              LKR {originalPrice.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </OriginalPrice>
           )}
         </PriceContainer>

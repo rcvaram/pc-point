@@ -10,7 +10,7 @@ import {
   Alert,
   Snackbar
 } from '@mui/material';
-import { Email, Phone, LocationOn, Send } from '@mui/icons-material';
+import { Email, Phone, LocationOn, Send, WhatsApp } from '@mui/icons-material';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -39,8 +39,16 @@ const Contact = () => {
       return;
     }
     
-    // Here you would typically send the form data to your backend
-    // Form submission logic would go here
+    // Create WhatsApp message
+    const phoneNumber = '94712250020'; // Your WhatsApp number without the + sign
+    const message = `*New Contact Form Submission*%0A%0A` +
+                   `*Name:* ${formData.name}%0A` +
+                   `*Email:* ${formData.email}%0A` +
+                   (formData.subject ? `*Subject:* ${formData.subject}%0A` : '') +
+                   `*Message:*%0A${formData.message}`;
+    
+    // Open WhatsApp with pre-filled message
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
     
     // Show success message
     setOpen(true);
@@ -180,20 +188,18 @@ const Contact = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    startIcon={<Send />}
+                  <Button 
+                    type="submit" 
+                    variant="contained" 
+                    color="success" 
+                    size="large" 
+                    fullWidth
+                    startIcon={<WhatsApp />}
+                    endIcon={<Send />}
                     sx={{
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: 1,
-                      textTransform: 'none',
-                      fontWeight: 'medium',
+                      bgcolor: '#25D366',
                       '&:hover': {
-                        transform: 'translateY(-1px)',
+                        bgcolor: '#128C7E',
                         boxShadow: 2,
                       },
                       transition: 'all 0.2s'

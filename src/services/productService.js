@@ -57,6 +57,31 @@ export const getFeaturedProducts = async () => {
   }
 };
 
+// Get discounted products
+export const getDiscountedProducts = async () => {
+  try {
+    const q = query(
+      collection(db, PRODUCTS_COLLECTION),
+      where('discount', '>', 0)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      // Calculate final price after discount
+      const finalPrice = data.price - (data.price * (data.discount / 100));
+      return {
+        id: doc.id,
+        ...data,
+        finalPrice: Math.round(finalPrice * 100) / 100 // Round to 2 decimal places
+      };
+    });
+  } catch (error) {
+    console.error('Error getting discounted products:', error);
+    throw error;
+  }
+};
+
 // Get products by category
 export const getProductsByCategory = async (category) => {
   try {

@@ -271,7 +271,7 @@ const Navbar = () => {
                         >
                           <ListItemText 
                             primary={product.name} 
-                            secondary={`$${product.price?.toFixed(2) || '0.00'}`}
+                            secondary={`LKR ${product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`}
                           />
                         </ListItem>
                       ))}

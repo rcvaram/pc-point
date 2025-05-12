@@ -54,6 +54,7 @@ export default function Dashboard() {
     price: '',
     category: '',
     stock: '',
+    discount: '0',
     rating: '4.5',
     image: ''
   });
@@ -89,15 +90,14 @@ export default function Dashboard() {
   const handleOpen = (product = null) => {
     if (product) {
       setFormData({
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        category: product.category,
-        stock: product.stock,
-        rating: product.rating,
-        image: product.image,
-        // Include the existing createdAt for updates
-        createdAt: product.createdAt
+        name: product.name || '',
+        description: product.description || '',
+        price: product.price?.toString() || '',
+        category: product.category || '',
+        stock: product.stock?.toString() || '',
+        discount: product.discount?.toString() || '0',
+        rating: product.rating?.toString() || '4.5',
+        image: product.image || ''
       });
       setPreviewUrl(product.image);
       setEditingProduct(product.id);
@@ -108,6 +108,7 @@ export default function Dashboard() {
         price: '',
         category: '',
         stock: '',
+        discount: '0',
         rating: '4.5',
         image: ''
       });
@@ -167,6 +168,7 @@ export default function Dashboard() {
         category: formData.category,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock, 10),
+        discount: parseFloat(formData.discount) || 0,
         rating: formData.rating ? parseFloat(formData.rating) : 0,
         image: imageUrl,
         updatedAt: new Date().toISOString()
@@ -502,7 +504,7 @@ export default function Dashboard() {
                     </MenuItem>
                   ))}
                 </TextField>
-                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
                   <TextField
                     required
                     fullWidth
@@ -512,6 +514,7 @@ export default function Dashboard() {
                     value={formData.price}
                     onChange={handleInputChange}
                     inputProps={{ step: '0.01', min: '0' }}
+                    sx={{ flex: '1 1 200px' }}
                   />
                   <TextField
                     required
@@ -522,6 +525,18 @@ export default function Dashboard() {
                     value={formData.stock}
                     onChange={handleInputChange}
                     inputProps={{ min: '0' }}
+                    sx={{ flex: '1 1 150px' }}
+                  />
+                  <TextField
+                    required
+                    fullWidth
+                    label="Discount %"
+                    name="discount"
+                    type="number"
+                    value={formData.discount}
+                    onChange={handleInputChange}
+                    inputProps={{ min: '0', max: '100', step: '1' }}
+                    sx={{ flex: '1 1 120px' }}
                   />
                   <TextField
                     required
@@ -532,6 +547,7 @@ export default function Dashboard() {
                     value={formData.rating}
                     onChange={handleInputChange}
                     inputProps={{ step: '0.1', min: '0', max: '5' }}
+                    sx={{ flex: '1 1 120px' }}
                   />
                 </Box>
                 <input

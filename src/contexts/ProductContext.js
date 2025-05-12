@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   getAllProducts, 
   getFeaturedProducts, 
+  getDiscountedProducts,
   getProductsByCategory,
   getCategories as fetchCategories
 } from '../services/productService.js';
@@ -15,6 +16,7 @@ export const useProducts = () => {
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [discountedProducts, setDiscountedProducts] = useState([]);
   const [categories, setCategories] = useState(['All Categories']);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,14 +24,16 @@ export const ProductProvider = ({ children }) => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const [allProducts, featured, cats] = await Promise.all([
+      const [allProducts, featured, discounted, cats] = await Promise.all([
         getAllProducts(),
         getFeaturedProducts(),
+        getDiscountedProducts(),
         fetchCategories()
       ]);
       
       setProducts(allProducts);
       setFeaturedProducts(featured);
+      setDiscountedProducts(discounted);
       setCategories(cats);
       setError(null);
     } catch (err) {
@@ -67,6 +71,7 @@ export const ProductProvider = ({ children }) => {
   const value = {
     products,
     featuredProducts,
+    discountedProducts,
     categories,
     loading,
     error,

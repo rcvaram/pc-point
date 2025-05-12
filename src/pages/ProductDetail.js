@@ -13,6 +13,7 @@ import {
   Rating
 } from '@mui/material';
 import { ArrowBack, WhatsApp, FavoriteBorder } from '@mui/icons-material';
+import DiscountBadge from '../components/products/DiscountBadge.js';
 import { useProducts } from '../contexts/ProductContext.js';
 
 const ProductDetail = () => {
@@ -72,18 +73,25 @@ const ProductDetail = () => {
       <Paper elevation={2} sx={{ p: 4 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
-            <Box 
-              component="img"
-              src={product.image || 'https://placehold.co/600x400/eee/999999?text=No+Image'}
-              alt={product.name}
-              sx={{ 
-                width: '100%', 
-                height: 'auto',
-                maxHeight: 400,
-                objectFit: 'contain',
-                borderRadius: 1
-              }}
-            />
+            <Box sx={{ position: 'relative' }}>
+              <Box 
+                component="img"
+                src={product.image || 'https://placehold.co/600x400/eee/999999?text=No+Image'}
+                alt={product.name}
+                sx={{ 
+                  width: '100%', 
+                  height: 'auto',
+                  maxHeight: 400,
+                  objectFit: 'contain',
+                  borderRadius: 1
+                }}
+              />
+              {product.discount > 0 && (
+                <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+                  <DiscountBadge discount={product.discount} size="large" />
+                </Box>
+              )}
+            </Box>
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="h4" component="h1" gutterBottom>
@@ -97,23 +105,38 @@ const ProductDetail = () => {
               </Typography>
             </Box>
             
-            <Typography variant="h5" color="primary" mb={3}>
-              ${product.price?.toFixed(2) || '0.00'}
-              {product.originalPrice && (
-                <Typography 
-                  component="span" 
-                  variant="body1" 
-                  color="text.secondary"
-                  sx={{
-                    textDecoration: 'line-through',
-                    ml: 2,
-                    display: 'inline-block'
-                  }}
-                >
-                  ${product.originalPrice.toFixed(2)}
+            <Box mb={3}>
+              {product.discount > 0 ? (
+                <>
+                  <Typography variant="h5" color="error" component="span">
+                    LKR {((product.price * (100 - product.discount)) / 100).toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Typography>
+                  <Typography 
+                    component="span" 
+                    variant="h6" 
+                    color="text.secondary"
+                    sx={{
+                      textDecoration: 'line-through',
+                      ml: 2,
+                      display: 'inline-block'
+                    }}
+                  >
+                    LKR {product.price.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Typography>
+                  <Typography 
+                    variant="subtitle1" 
+                    color="error.main"
+                    sx={{ ml: 1, display: 'inline-block' }}
+                  >
+                    (Save {product.discount}%)
+                  </Typography>
+                </>
+              ) : (
+                <Typography variant="h5" color="primary">
+                  LKR {product.price?.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                 </Typography>
               )}
-            </Typography>
+            </Box>
             
             <Typography variant="body1" paragraph>
               {product.description || 'No description available.'}

@@ -89,7 +89,7 @@ Admin dashboard is available at `/admin/dashboard` (login required)
 
 ## 📞 Contact
 
-For support or inquiries, please contact us via WhatsApp: [+94 77 943 9400](https://wa.me/94779439400)
+For support or inquiries, please contact PC Point via WhatsApp: [+94 77 943 9400](https://wa.me/94779439400)
 
 ## 📄 License
 
